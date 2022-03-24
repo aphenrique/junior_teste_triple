@@ -50,3 +50,7 @@ app.*.map.json
 .vscode
 
 /lib/environment_config.dart
+
+windows/
+ios/
+web/
