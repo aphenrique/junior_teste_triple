@@ -1,5 +1,4 @@
 import 'dart:developer';
-import 'dart:io';
 
 import 'package:fteam_test/src/core/utils/clients/errors/client_exception.dart';
 import 'package:fteam_test/src/core/utils/connection_verifier/connection_verifier.dart';
