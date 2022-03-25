@@ -6,9 +6,9 @@ import 'package:fteam_test/src/modules/walpapers/domain/usecases/download_photo_
 import 'package:fteam_test/src/modules/walpapers/domain/usecases/fetch_photos_usecase.dart';
 import 'package:fteam_test/src/modules/walpapers/external/api_photo_datasource.dart';
 import 'package:fteam_test/src/modules/walpapers/external/image_downloader_datasource.dart';
-import 'package:fteam_test/src/modules/walpapers/view/blocs/photos_bloc.dart';
+import 'package:fteam_test/src/modules/walpapers/view/stores/fetch_photos_store.dart';
+import 'package:fteam_test/src/modules/walpapers/view/stores/page_params_store.dart';
 import 'package:fteam_test/src/modules/walpapers/view/pages/list_photos_page.dart';
-import 'package:fteam_test/src/modules/walpapers/view/blocs/stores/page_params_store.dart';
 
 class PhotosModule extends Module {
   @override
@@ -20,7 +20,7 @@ class PhotosModule extends Module {
         Bind.singleton((i) => PhotoRepositoryImpl(i(), i())),
         Bind.singleton((i) => FetchPhotosUsecaseImpl(i())),
         Bind.singleton((i) => DownloadPhotoUsecaseImpl(i())),
-        Bind.lazySingleton((i) => PhotosBloc(i())),
+        Bind.lazySingleton((i) => FetchPhotosStore(i())),
 
         // stores
         Bind.singleton((i) => PageParamsStore()),

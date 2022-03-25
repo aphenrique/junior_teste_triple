@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:fteam_test/src/core/colors/app_colors.dart';
-import 'package:fteam_test/src/modules/walpapers/view/blocs/stores/page_params_store.dart';
+import 'package:fteam_test/src/modules/walpapers/view/stores/page_params_store.dart';
 
 class PerPageSlideComponent extends StatefulWidget {
   const PerPageSlideComponent({Key? key}) : super(key: key);

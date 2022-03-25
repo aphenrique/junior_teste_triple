@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:fteam_test/src/core/colors/app_colors.dart';
-import 'package:fteam_test/src/modules/walpapers/view/blocs/events/photos_event.dart';
-import 'package:fteam_test/src/modules/walpapers/view/blocs/photos_bloc.dart';
-import 'package:fteam_test/src/modules/walpapers/view/blocs/stores/page_params_store.dart';
+import 'package:fteam_test/src/modules/walpapers/view/stores/fetch_photos_store.dart';
+import 'package:fteam_test/src/modules/walpapers/view/stores/page_params_store.dart';
 
 class CustomSerchBarWidget extends StatelessWidget implements PreferredSize {
   CustomSerchBarWidget({Key? key}) : super(key: key);
 
-  final photosBloc = Modular.get<PhotosBloc>();
+  final photosStore = Modular.get<FetchPhotosStore>();
   final pageParams = Modular.get<PageParamsStore>();
 
   @override
@@ -30,13 +29,7 @@ class CustomSerchBarWidget extends StatelessWidget implements PreferredSize {
 
           pageParams.setQuery(value.trim().isNotEmpty ? value : null);
 
-          photosBloc.add(
-            FetchPhotosEvent(
-              query: pageParams.query,
-              apiPage: pageParams.apiPage,
-              perPage: pageParams.perPage,
-            ),
-          );
+          photosStore.fetchPhotos(pageParams);
         },
         style: const TextStyle(
           color: AppColors.searchFieldColor,

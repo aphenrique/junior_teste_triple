@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
-
+import 'package:flutter_triple/flutter_triple.dart';
 import 'package:fteam_test/src/modules/walpapers/domain/entities/photo_entity.dart';
-import 'package:fteam_test/src/modules/walpapers/view/blocs/events/photos_event.dart';
-import 'package:fteam_test/src/modules/walpapers/view/blocs/photos_bloc.dart';
-import 'package:fteam_test/src/modules/walpapers/view/blocs/states/photos_state.dart';
-import 'package:fteam_test/src/modules/walpapers/view/blocs/stores/page_params_store.dart';
+import 'package:fteam_test/src/modules/walpapers/domain/erros/photo_exception.dart';
+import 'package:fteam_test/src/modules/walpapers/view/stores/states/fetch_photos_state.dart';
+import 'package:fteam_test/src/modules/walpapers/view/stores/fetch_photos_store.dart';
+import 'package:fteam_test/src/modules/walpapers/view/stores/page_params_store.dart';
 import 'package:fteam_test/src/modules/walpapers/view/widgets/custom_small_photo_widget.dart';
 
 class CustomPhotoGridViewWidget extends StatefulWidget {
@@ -20,7 +19,7 @@ class CustomPhotoGridViewWidget extends StatefulWidget {
 class _CustomPhotoGridViewWidgetState extends State<CustomPhotoGridViewWidget> {
   List<PhotoEntity> photos = [];
 
-  final photosBloc = Modular.get<PhotosBloc>();
+  final photosStore = Modular.get<FetchPhotosStore>();
   final pageParams = Modular.get<PageParamsStore>();
 
   late final ScrollController scrollController;
@@ -34,71 +33,46 @@ class _CustomPhotoGridViewWidgetState extends State<CustomPhotoGridViewWidget> {
       () {
         if (scrollController.offset >=
                 scrollController.position.maxScrollExtent - 80 &&
-            photosBloc.state is FetchPhotosSucess) {
+            photosStore.state is FetchPhotosSucessState) {
           pageParams.incrementApiPage();
 
-          photosBloc.add(
-            FetchPhotosEvent(
-              query: pageParams.query,
-              apiPage: pageParams.apiPage,
-              perPage: pageParams.perPage,
-            ),
-          );
+          photosStore.fetchPhotos(pageParams);
         }
       },
     );
 
-    photosBloc.add(
-      FetchPhotosEvent(
-        apiPage: pageParams.apiPage,
-        perPage: pageParams.perPage,
-      ),
-    );
+    photosStore.fetchPhotos(pageParams);
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<PhotosBloc, PhotosState>(
-      bloc: photosBloc,
-      builder: (context, state) {
-        if (state is FetchPhotosInitial) {
+    return ScopedBuilder(
+      store: photosStore,
+      onError: (_, PhotoException? error) => Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            '${error?.message}',
+            style: const TextStyle(color: Colors.white),
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: () {
+              photosStore.fetchPhotos(pageParams);
+            },
+            child: const Text('Tentar novamente'),
+          ),
+        ],
+      ),
+      onLoading: (_) => const Center(child: CircularProgressIndicator()),
+      onState: (_, state) {
+        if (state is FetchPhotosInitialState) {
           photos.clear();
           pageParams.resetApiPage();
           return Container();
         }
 
-        if (state is FetchPhotosLoading && photos.isEmpty) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        }
-
-        if (state is FetchPhotosError) {
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                state.message,
-                style: const TextStyle(color: Colors.white),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  photosBloc.add(
-                    FetchPhotosEvent(
-                      query: pageParams.query,
-                      apiPage: pageParams.apiPage,
-                      perPage: pageParams.perPage,
-                    ),
-                  );
-                },
-                child: const Text('Tentar novamente'),
-              ),
-            ],
-          );
-        }
-
-        if (state is FetchPhotosSucess) photos.addAll(state.photos);
+        if (state is FetchPhotosSucessState) photos.addAll(state.photos);
 
         return Padding(
           padding: const EdgeInsets.all(8.0),
@@ -121,7 +95,7 @@ class _CustomPhotoGridViewWidgetState extends State<CustomPhotoGridViewWidget> {
                   },
                 ),
               ),
-              if (state is FetchPhotosLoading)
+              if (state is FetchPhotosLoadingState)
                 const Padding(
                   padding: EdgeInsets.all(8),
                   child: Center(child: CircularProgressIndicator()),
